@@ -1,0 +1,20 @@
+#!/bin/sh
+
+SYSTEMD=/etc/systemd/system
+
+install_unit() {
+	SERVICE=$(basename $1)
+	echo "Installing service $SERVICE"
+	install $1 /etc/systemd/system/
+	systemctl enable $SERVICE
+}
+
+UNITS=etc/systemd/system/*.service
+
+for unit in $UNITS; do
+  install_unit $unit
+done
+
+systemctl daemon-reload
+
+docker ps
