@@ -1,0 +1,25 @@
+[Unit]
+Description=Lets encrypt Nginx Proxy companion
+After=nginx-proxy.service
+Requires=nginx-proxy.service
+
+[Service]
+Group=docker
+ExecStartPre=-/usr/bin/docker stop %n
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=/usr/bin/docker pull jrcs/letsencrypt-nginx-proxy-companion
+ExecStart=/usr/bin/docker run \
+	--name %n \
+	-v /var/run/docker.sock:/var/run/docker.sock:ro \
+	-v /etc/nginx/certs:/etc/nginx/certs:rw \
+	--volumes-from nginx-proxy.service \
+		jrcs/letsencrypt-nginx-proxy-companion
+ExecStop=/usr/bin/docker stop -t 2 %n
+ExecStopPost=/usr/bin/docker rm -f %n
+Restart=always
+RestartSec=10s
+TimeoutStartSec=0
+TimeoutStopSec=150
+
+[Install]
+WantedBy=multi-user.target
